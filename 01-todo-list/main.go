@@ -29,7 +29,7 @@ func deleteOne(curr *[]Todo, id int) {
 		}
 	}
 
-	fmt.Println("Todo not found for %d", id)
+	fmt.Println("Todo not found for", id)
 
 }
 
