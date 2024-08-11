@@ -2,7 +2,9 @@ package main
 
 import (
     "fmt"
+	"os"
 	"time"
+	"encoding/csv"
 	"github.com/mergestat/timediff"
 )
 
@@ -17,7 +19,8 @@ type Todo struct {
 func createNew(curr *[]Todo, new string) {
 	*curr = append(*curr, Todo{
 		id: len(*curr) + 1, 
-		text: new, completed: false, 
+		text: new, 
+		completed: false, 
 		createdAt: time.Now()})
 }
 
@@ -47,29 +50,51 @@ func printDivider() {
 	fmt.Println("--------------------------------------------------------------------------------")
 }
 
+
+func loadCSV(fileName string) *os.File {
+	file, err := os.Open(fileName)
+    if err != nil {
+        file, err = os.Create(fileName)
+		return file
+    }
+
+	return file
+	
+}
+
+func saveCSV(file *os.File, todos *[]Todo) {
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	header := []string{"id", "text", "completed", "createdAt"}
+	w.Write(header)
+	w.Flush()
+
+	for _, todo := range *todos {
+		w.Write([]string{fmt.Sprint(todo.id), todo.text, fmt.Sprint(todo.completed), fmt.Sprint(todo.createdAt)})
+		w.Flush()
+	}
+}
+
 func main() {
     
 	todos := new([]Todo)
+
+	csv := loadCSV("todos.csv")
 
 	createNew(todos, "Buy eggs")
 	createNew(todos, "Buy milk")
     createNew(todos, "Buy eggs")
     createNew(todos, "Buy bread")
+	createNew(todos, "Buy raspberries")
+	createNew(todos, "Buy bananas")
 	
 
-	printDivider()
+	// todo: fix existing todos file etc
 
-	listTODOs(todos)
+	saveCSV(csv, todos)
 
-	printDivider()
-
-	deleteOne(todos, 2)
-	
-	printDivider()
-
-	deleteOne(todos, 5)
-    
-	printDivider()
 
 	listTODOs(todos)
 }
